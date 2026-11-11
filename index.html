@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6G SUPER-FAST DIGITAL CLOCK</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Rajdhani:wght@600;700&display=swap');
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background: radial-gradient(circle at center, #0a0f1d 0%, #02040a 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        color: #f8fafc;
+    }
+
+    /* आउटर घूमती हुई नियोन ब्लू लाइट रिंग */
+    .watch-container {
+        position: relative;
+        width: 530px;
+        height: 530px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 3px;
+        background: conic-gradient(from 0deg, transparent 0%, transparent 65%, #00f2fe 85%, #4facfe 100%);
+        animation: rotateBlueNeon 4s linear infinite;
+        box-shadow: 0 0 50px rgba(0, 242, 254, 0.2), inset 0 0 15px rgba(79, 172, 254, 0.1);
+    }
+
+    @keyframes rotateBlueNeon {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* गोल घड़ी का मुख्य हिस्सा */
+    .round-watch {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(15, 23, 42, 0.98) 0%, rgba(3, 7, 18, 0.99) 100%);
+        box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+        animation: counterRotate 4s linear infinite;
+    }
+
+    @keyframes counterRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(-360deg); }
+    }
+
+    /* अंदर वाली बारीक घूमती हुई नियोन ब्लू लाइट रिंग */
+    .round-watch::before {
+        content: '';
+        position: absolute;
+        top: 15px; left: 15px; right: 15px; bottom: 15px;
+        border-radius: 50%;
+        padding: 2px;
+        background: conic-gradient(from 180deg, transparent 0%, transparent 70%, #00f2fe 90%, #ffffff 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        animation: rotateInnerNeon 6s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes rotateInnerNeon {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .digital-box {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .digital {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 56px;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 2px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.35), 0 0 45px rgba(0, 242, 254, 0.3);
+        line-height: 1.1;
+    }
+
+    .ampm {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 56px;
+        font-weight: 700;
+        color: #00f2fe;
+        letter-spacing: 1px;
+        text-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+        line-height: 1.1;
+    }
+
+    .hindi-spoken {
+        font-size: 20px;
+        color: #38bdf8;
+        margin-top: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        min-height: 30px;
+        padding: 0 10px;
+    }
+
+    .separator {
+        height: 1px;
+        width: 50%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        margin: 18px 0;
+    }
+
+    .date-box {
+        font-size: 16px;
+        font-weight: 500;
+        color: #cbd5e1;
+        letter-spacing: 0.5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="watch-container">
+    <div class="round-watch">
+        <div class="digital-box">
+            <div class="digital" id="digitalTime">00:00:00</div>
+            <div class="ampm" id="ampmText">AM</div>
+        </div>
+        <div class="hindi-spoken" id="hindiTime">समय सिंक हो रहा है...</div>
+        <div class="separator"></div>
+        <div class="date-box" id="dateInfo">--</div>
+    </div>
+</div>
+
+<script>
+function getDetailedHindiTime(hour, minute, second) {
+    let displayHour = hour % 12 || 12;
+    let nextHour = (displayHour % 12) + 1;
+
+    // पहर निर्धारित करें (सुबह, दोपहर, शाम, रात्रि)
+    let timePeriod = "";
+    if (hour >= 4 && hour < 12) {
+        timePeriod = "सुबह";
+    } else if (hour >= 12 && hour < 16) {
+        timePeriod = "दोपहर";
+    } else if (hour >= 16 && hour < 20) {
+        timePeriod = "शाम";
+    } else {
+        timePeriod = "रात्रि";
+    }
+
+    // खास बोलचाल के समय
+    let spokenTime = "";
+    if (minute === 15 && second === 0) {
+        spokenTime = `सवा ${displayHour} बज गए हैं`;
+    } else if (minute === 30 && second === 0) {
+        if (displayHour === 1) spokenTime = "डेढ़ बज गया है";
+        else if (displayHour === 2) spokenTime = "ढाई बज गए हैं";
+        else spokenTime = `साढ़े ${displayHour} बज गए हैं`;
+    } else if (minute === 45 && second === 0) {
+        spokenTime = `पौने ${nextHour} बज गए हैं`;
+    } else if (minute === 0 && second === 0) {
+        spokenTime = `${displayHour} बज गए हैं`;
+    } else {
+        spokenTime = `${displayHour} बजकर ${minute} मिनट ${second} सेकंड`;
+    }
+
+    return `${timePeriod} ${spokenTime}`;
+}
+
+function updateClock() {
+    let now = new Date();
+    let hour = now.getHours();
+    let minute = now.getMinutes();
+    let second = now.getSeconds();
+
+    let displayHour = hour % 12 || 12;
+    let ampm = hour >= 12 ? "PM" : "AM";
+
+    // डिजिटल क्लॉक फॉर्मेट
+    let digital = `${displayHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+    document.getElementById("digitalTime").textContent = digital;
+    document.getElementById("ampmText").textContent = ampm;
+
+    // हिंदी बोलचाल समय
+    document.getElementById("hindiTime").textContent = getDetailedHindiTime(hour, minute, second);
+
+    // Title Case अंग्रेजी दिन, हिंदी वार, महीना और साल
+    let engDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    let hindiDays = ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
+    let months = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"];
+    
+    let currentDayIndex = now.getDay();
+    let dateStr = `${engDays[currentDayIndex]}-${hindiDays[currentDayIndex]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    
+    document.getElementById("dateInfo").textContent = dateStr;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+</body>
+</html>
